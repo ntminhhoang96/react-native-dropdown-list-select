@@ -53,7 +53,6 @@ const SelectList: React.FC<SelectListProps> =  ({
         setDropdown(true)
         Animated.timing(animatedvalue,{
             toValue:height,
-            //TODO Sửa chỗ này để animation được smooth
             useNativeDriver:false,
         }).start()
     }
@@ -61,7 +60,6 @@ const SelectList: React.FC<SelectListProps> =  ({
         
         Animated.timing(animatedvalue,{
             toValue:0,
-            //TODO Sửa chỗ này để animation được smooth
             useNativeDriver:false,
             
         }).start(() => setDropdown(false))
@@ -158,7 +156,7 @@ const SelectList: React.FC<SelectListProps> =  ({
                                 }}
                                 style={[{padding:0,height:20,flex:1,fontFamily},inputStyles]}
                             />
-                                <TouchableOpacity onPress={() => {slideup(); setSelectedVal("");setSelected(null);}} >
+                                <TouchableOpacity onPress={() => {slideup(); setSelectedVal("");setSelected ? setSelected(null) : setSelected;}} >
 
                                 {
                                     (!closeicon)
