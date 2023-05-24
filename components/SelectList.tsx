@@ -8,11 +8,12 @@ import {
     ScrollView,
     Animated,
     TextInput,
+    Easing
 } from 'react-native';
 
 import { SelectListProps } from '..';
 
-type L1Keys = { key?: any; value?: any; disabled?: boolean | undefined }
+type L1Keys = { code?: any; name?: any;  id?: any;  province_name?: any; district_name?: any;  province_id?: any; school_id?: any; district_id?: any; level?: any; disabled?: boolean | undefined }
 
 const SelectList: React.FC<SelectListProps> =  ({
         setSelected,
@@ -29,12 +30,12 @@ const SelectList: React.FC<SelectListProps> =  ({
         arrowicon = false,
         closeicon = false,
         search = true,
-        searchPlaceholder = "search",
-        notFoundText = "No data found",
+        searchPlaceholder = "Tìm kiếm",
+        notFoundText = "không tìm thấy dữ liệu",
         disabledItemStyles,
         disabledTextStyles,
         onSelect = () => {},
-        save = 'key',
+        save = 'name',
         dropdownShown = false,
         fontFamily
     }) => {
@@ -52,16 +53,15 @@ const SelectList: React.FC<SelectListProps> =  ({
         setDropdown(true)
         Animated.timing(animatedvalue,{
             toValue:height,
-            duration:500,
+            //TODO Sửa chỗ này để animation được smooth
             useNativeDriver:false,
-            
         }).start()
     }
     const slideup = () => {
         
         Animated.timing(animatedvalue,{
             toValue:0,
-            duration:500,
+            //TODO Sửa chỗ này để animation được smooth
             useNativeDriver:false,
             
         }).start(() => setDropdown(false))
@@ -139,15 +139,26 @@ const SelectList: React.FC<SelectListProps> =  ({
                                 placeholder={searchPlaceholder}
                                 onChangeText={(val) => {
                                     let result =  data.filter((item: L1Keys) => {
-                                        val.toLowerCase();
-                                        let row = item.value.toLowerCase()
-                                        return row.search(val.toLowerCase()) > -1;
+                                        val = val.toLowerCase();
+                                        let row = item.name.toLowerCase()
+                                        row = row.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+                                        row = row.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+                                        row = row.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+                                        row = row.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+                                        row = row.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+                                        row = row.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+                                        row = row.replace(/đ/g, "d");
+                                        row = row.replace(/!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g,
+                                        " ");
+                                        row = row.replace(/ + /g, " ");
+                                        row = row.trim();
+                                        return row.search(val) > -1;
                                     });
                                     setFilteredData(result)
                                 }}
                                 style={[{padding:0,height:20,flex:1,fontFamily},inputStyles]}
                             />
-                                <TouchableOpacity onPress={() => slideup()} >
+                                <TouchableOpacity onPress={() => {slideup(); setSelectedVal("");setSelected(null);}} >
 
                                 {
                                     (!closeicon)
@@ -169,7 +180,7 @@ const SelectList: React.FC<SelectListProps> =  ({
                     </View>
                 :
                     <TouchableOpacity style={[styles.wrapper,boxStyles]} onPress={() => { if(!dropdown){ slidedown() }else{ slideup() } }}>
-                        <Text style={[{fontFamily},inputStyles]}>{ (selectedval == "") ? (placeholder) ? placeholder : 'Select option' : selectedval  }</Text>
+                        <Text style={[{fontFamily},inputStyles]}>{ (selectedval == "") ? (placeholder) ? placeholder : 'Chọn' : selectedval  }</Text>
                         {
                             (!arrowicon)
                             ?
@@ -195,8 +206,9 @@ const SelectList: React.FC<SelectListProps> =  ({
                                 (filtereddata.length >=  1)
                                 ?
                                 filtereddata.map((item: L1Keys,index: number) => {
-                                    let key = item.key ?? item.value ?? item;
-                                    let value = item.value ?? item;
+                                    let key = item.code ?? item.name ?? item;
+                                    let value = item.name ?? item;
+                                    let level = item.level;
                                     let disabled = item.disabled ?? false;
                                     if(disabled){
                                         return(
@@ -207,15 +219,15 @@ const SelectList: React.FC<SelectListProps> =  ({
                                     }else{
                                         return(
                                             <TouchableOpacity style={[styles.option,dropdownItemStyles]} key={index} onPress={ () => {
-                                                if(save === 'value'){
-                                                    setSelected(value);
+                                                if(save === 'name'){
+                                                    setSelected({ value, key, level });
                                                 }else{
                                                     setSelected(key)
                                                 }
                                                 
                                                 setSelectedVal(value)
                                                 slideup()
-                                                setTimeout(() => {setFilteredData(data)}, 800)
+                                                setTimeout(() => {setFilteredData(data)}, 100)
                                                 
                                             }}>
                                                 <Text style={[{fontFamily},dropdownTextStyles]}>{value}</Text>
@@ -229,7 +241,7 @@ const SelectList: React.FC<SelectListProps> =  ({
                                     setSelected(undefined)
                                     setSelectedVal("")
                                     slideup()
-                                    setTimeout(() => setFilteredData(data), 800)
+                                    setTimeout(() => setFilteredData(data), 100)
                                     
                                 }}>
                                     <Text style={[{fontFamily},dropdownTextStyles]}>{notFoundText}</Text>
@@ -254,7 +266,8 @@ export default SelectList;
 
 
 const styles = StyleSheet.create({
-    wrapper:{ borderWidth:1,borderRadius:10,borderColor:'gray',paddingHorizontal:20,paddingVertical:12,flexDirection:'row',justifyContent:'space-between' },
+    wrapper:{ borderWidth:1,borderRadius:10,borderColor:'gray', paddingVertical:12,flexDirection:'row',
+    justifyContent:'space-between', borderTopWidth: 0, borderLeftWidth: 0, borderRightWidth: 0  },
     dropdown:{ borderWidth:1,borderRadius:10,borderColor:'gray',marginTop:10,overflow:'hidden'},
     option:{ paddingHorizontal:20,paddingVertical:8,overflow:'hidden' },
     disabledoption:{ paddingHorizontal:20,paddingVertical:8,flexDirection:'row',alignItems:'center', backgroundColor:'whitesmoke',opacity:0.9}
