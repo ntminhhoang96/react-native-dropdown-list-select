@@ -17,6 +17,7 @@ type L1Keys = { code?: any; name?: any;  id?: any;  province_name?: any; distric
 
 const SelectList: React.FC<SelectListProps> =  ({
         setSelected,
+        selectedValue,
         placeholder,
         boxStyles,
         inputStyles,
@@ -84,6 +85,12 @@ const SelectList: React.FC<SelectListProps> =  ({
         onSelect()
     },[selectedval])
   
+
+    React.useEffect(() => {
+        // console.log(setSelected);
+        // console.log(selectedval);
+        
+    },[setSelected])
 
     React.useEffect(() => {
         if(!_firstRender && defaultOption && oldOption.current != defaultOption.key ){
@@ -178,7 +185,7 @@ const SelectList: React.FC<SelectListProps> =  ({
                     </View>
                 :
                     <TouchableOpacity style={[styles.wrapper,boxStyles]} onPress={() => { if(!dropdown){ slidedown() }else{ slideup() } }}>
-                        <Text style={[{fontFamily},inputStyles]}>{ (selectedval == "") ? (placeholder) ? placeholder : 'Chọn' : selectedval  }</Text>
+                        <Text style={[{fontFamily},inputStyles]}>{ selectedValue }</Text>
                         {
                             (!arrowicon)
                             ?
@@ -226,6 +233,7 @@ const SelectList: React.FC<SelectListProps> =  ({
                                                 setSelectedVal(value)
                                                 slideup()
                                                 setTimeout(() => {setFilteredData(data)}, 100)
+                                                console.log(selectedValue);
                                                 
                                             }}>
                                                 <Text style={[{fontFamily},dropdownTextStyles]}>{value}</Text>
