@@ -7,8 +7,14 @@ export interface SelectListProps  {
     * Fn to set Selected option value which will be stored in your local state
     */
     setSelected: Function,
-    
+
+    selectToRemove: Function,
+  
+    isRemovable?: boolean,
+  
     selectedValue?: string,
+
+    removeIcon?: JSX.Element,
     /**
     * Placeholder text that will be displayed in the select box
     */
